@@ -21,8 +21,10 @@ import CartModal from '../components/cartmodal';
 import NetInfo from '@react-native-community/netinfo';
 import GetCurDate from '../components/getCurDate';
 import InternetError from '../components/InternetError';
+const signalR = require('@microsoft/signalr');
 //import {set} from 'react-native-reanimated';
 const NewSale = ({navigation, route}) => {
+  let connection = null;
   apicontroller = new ApiController();
   localstorage = new LocalStorage();
   const [selectedshopkeeper, setShopkeeper] = useState(0);
@@ -256,11 +258,18 @@ const NewSale = ({navigation, route}) => {
             console.log('responce:', responce.data);
             if (responce.data.result == 'success') {
               //alert('Sale Done');
+              connection = new signalR.HubConnectionBuilder()
+                .withUrl('http://ahmedpos1997-001-site1.etempurl.com/Myhub')
+                .build();
 
               Alert.alert('Done', 'Your Sale is Done', [
                 {
                   text: 'OK',
                   onPress: () => {
+                    connection
+                      .start()
+                      .then(() => connection.invoke('SaleDone'));
+
                     console.log('OK Pressed');
                     navigation.navigate('Home');
                   },
